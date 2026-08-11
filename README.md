@@ -1,6 +1,6 @@
 # Peak Learning for Denoising Mass Spectrometry Imaging Data
 
-*Unsupervised and statistical methods for identifying technique-induced "artefact" peaks in ~14,000-channel mass-spectrometry imaging data. MSc thesis, KU Leuven (2023–24).*
+*Unsupervised and statistical methods for identifying technique-induced "artefact" peaks in ~14,000-channel mass-spectrometry imaging data. [MSc thesis](https://lib.is/lbsn9994214392401471/representation?libis=11:1:1&lang=en), KU Leuven (2023–24).*
 
 ## Overview
 
@@ -28,11 +28,12 @@ peak_learning/            # analysis package
   viz.py                  # plotting helpers
   io.py, helpers.py       # data loading and small utilities
 notebooks/
-  01_islet_mapping.ipynb        # builds the islet map, writes islet_map.npy
-  02_peak_identification.ipynb  # correlation + GMM peak candidates
-  03_validation.ipynb           # spatial tests, cross-method comparison, UMAP
+  01_islet_mapping.ipynb         # builds the islet region map, writes islet_map.npy
+  02_peaks_and_validation.ipynb  # correlation + GMM peak identification, then spatial validation + UMAP
 figures/                  # exported figures used in this README
 ```
+
+Peak identification and its validation share the same in-memory object state, so they live in one notebook rather than being split.
 
 ## Setup
 
@@ -42,11 +43,11 @@ conda activate peak-learning
 jupyter lab
 ```
 
-Run the notebooks in order. `01_islet_mapping.ipynb` writes `islet_map.npy`, which `02` and `03` load.
+Run the two notebooks in order: `01_islet_mapping.ipynb` writes `data/M2/islet_map.npy` (the region map), which `02_peaks_and_validation.ipynb` loads for the spatial-enrichment tests.
 
 ## Data
 
-The MSI dataset (mouse pancreatic tissue, array shape 14,000 × 165 × 228) is not included — it belongs to the lab and is available on request; the notebooks will not run end-to-end without it. For access, open an issue or contact the corresponding lab at KU Leuven.
+The MSI dataset (mouse pancreatic tissue, array shape 14,000 × 165 × 228) is not included — it belongs to the lab and is available on request; the notebooks will not run end-to-end without it. It is expected under `data/M2/`. Notebook 01 also writes the derived region map there as `islet_map.npy`, which notebook 02 consumes. For access, open an issue or contact the corresponding lab at KU Leuven.
 
 ## Contributions
 
@@ -59,6 +60,10 @@ Work in this repository that I (Serkan Shentyurk) wrote:
 - **Validation** — spatial-enrichment testing, cross-method comparison, and UMAP analysis (Ch 6; the chapter *write-up* was co-authored, the code here is mine)
 
 The **sliding-window method** (Ch 5) was developed by my co-author and is not included in this repository.
+
+## Thesis
+
+Butcher, C., & Shentyurk, S. (2024). *Peak Learning for Denoising Mass Spectrometry Imaging Data* [Master's thesis, KU Leuven, Faculty of Science]. Supervisor: Prof. Bart de Moor; mentors: Melanie Nijs, Thomas Vanhemel. https://lib.is/lbsn9994214392401471/representation?libis=11:1:1&lang=en
 
 ## Licence
 

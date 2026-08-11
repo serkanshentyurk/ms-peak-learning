@@ -14,17 +14,21 @@ class MSIData:
         self.data_all, self.residual, self.mz_vector, self.row2grid = load_data(path, dataset = dataset)
         self.data_all[self.data_all < 0] = 0
         
-        # cluster_indexes.npy is produced by the mapping step (IsletMap). Load it if
-        # it already exists so PeakModel/validation can use the labels. IsletMap is
-        # what *generates* the labels, so it must be able to construct without it.
-        path_index = os.path.join(path, 'cluster_indexes.npy')
-        if os.path.exists(path_index):
-            with open(path_index, 'rb') as f:
-                self.cluster_labels = np.load(f)
-            self.cluster_labels_map = make_image(self.row2grid, self.cluster_labels)
+        # Islet map from the mapping step (notebook 01 / IsletMap), saved as islet_map.npy:
+        # values 0 = rest, 1 = surrounding, 2 = islet periphery, 3 = islet inner.
+        # cluster_map_altered merges that to a binary non-islet(0) / islet(1) mask, which the
+        # validation code uses throughout. Guarded so IsletMap can construct before the file exists.
+        path_to_cluster = os.path.join(path, 'islet_map.npy')
+        if os.path.exists(path_to_cluster):
+            self.cluster_map = np.load(path_to_cluster)
+            cluster_map_altered = self.cluster_map.copy()
+            cluster_map_altered[self.cluster_map == 1] = 0
+            cluster_map_altered[self.cluster_map == 2] = 1
+            cluster_map_altered[self.cluster_map == 3] = 1
+            self.cluster_map_altered = cluster_map_altered
         else:
-            self.cluster_labels = None
-            self.cluster_labels_map = None
+            self.cluster_map = None
+            self.cluster_map_altered = None
 
         self.data = np.empty((self.data_all.shape[1], 228, 165))
         for mz_index in range(self.data_all.shape[1]):

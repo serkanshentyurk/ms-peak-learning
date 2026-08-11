@@ -116,6 +116,10 @@ class PeakModel(MSIData):
         self.correlated_all_1_corr = np.concatenate((np.concatenate((self.correlated_only_1_corr, self.correlated_only_2_corr)), self.correlated_both_1_corr))
         self.correlated_all_2_corr = np.concatenate((np.concatenate((self.correlated_only_1_corr, self.correlated_only_2_corr)), self.correlated_both_2_corr))
         
+        # validation.create_colours expects these 2-D arrays; column 0 holds the m/z values
+        self.correlated_insulin_1 = self.correlated_1_mz.reshape(-1, 1)
+        self.correlated_insulin_2 = self.correlated_2_mz.reshape(-1, 1)
+
         if plot:
             self.plot_correlated_mz()
             

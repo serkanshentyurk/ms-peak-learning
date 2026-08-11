@@ -14,8 +14,6 @@ from .io import load_data
 from .helpers import make_image, find_nearest_idx
 from .viz import generate_custom_cmap
 
-
-
 class IsletMap(MSIData):
     def __init__(self, path):
         super().__init__(path)
