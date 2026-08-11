@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Data — proprietary, never commit
+data/
+*.imzML
+*.ibd
+*.mat
+*.h5
+*.npy
+# !islet_map.npy
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/

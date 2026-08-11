@@ -1,0 +1,16 @@
+name: peak-learning
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10          # original was 3.9; 3.10 is a safe bump, test before relying on it
+  - numpy
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - plotly
+  - umap-learn           # imported as `umap`
+  - hdbscan
+  - scikit-fuzzy         # imported as `skfuzzy`
+  - opencv               # imported as `cv2`
+  - jupyterlab
+  - ipykernel
