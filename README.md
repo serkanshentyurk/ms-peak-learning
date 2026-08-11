@@ -12,7 +12,9 @@
 
 **Caveat.** The candidates were *not* checked against a ground-truth database of known molecules, so this repository demonstrates a reproducible method and evaluation process — not a validated biological result.
 
-![Region map of the islets](figures/islet_map.png)
+![Insulin distribution and the recovered islet map](figures/islet_map.png)
+
+*Left: insulin concentrates in the islets of Langerhans. Right: the mapping pipeline (edge detection + K-means) recovers those regions — inner islet (cyan), periphery (brown), surrounding tissue (green). This is the firmest result here; the peak identification that follows is exploratory.*
 
 *Final region map (notebook 01): the pipeline recovers the expected concentric islet structure — the firmest result here. The peak identification that follows is exploratory.*
 
