@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.signal import sp_find_peaks,savgol_filter
+from scipy.signal import find_peaks as sp_find_peaks, savgol_filter
 from scipy.interpolate import interp1d
 
 from sklearn.cluster import KMeans
@@ -10,13 +10,34 @@ from sklearn.mixture import GaussianMixture
 from .core import MSIData
 from .stats import find_threshold_z
 from .viz import plot_aic_bic
-from utils.method_utils import guassian_input_check, gaussian_mixture_determine_n_component
+
+
+def gaussian_input_check(x, chunk_count):
+    if isinstance(x, int) or isinstance(x, float):
+        return np.repeat(x, chunk_count)
+    elif np.array(x).shape[0] == 1:
+        return np.repeat(x, chunk_count)
+    else:
+        return np.array(x)
+
+
+def gaussian_mixture_determine_n_component(mz_array, n_component_max=30, n_repeat_experiment=10,
+                                           max_iter=100, n_init=10, covariance_type='diag'):
+    aic_results = np.empty((n_repeat_experiment, n_component_max - 1))
+    bic_results = np.empty((n_repeat_experiment, n_component_max - 1))
+    for repeat in range(n_repeat_experiment):
+        for n_component in range(1, n_component_max):
+            model = GaussianMixture(n_components=n_component, max_iter=max_iter,
+                                    n_init=n_init, covariance_type=covariance_type)
+            model.fit(mz_array)
+            aic_results[repeat, n_component - 1] = model.aic(mz_array)
+            bic_results[repeat, n_component - 1] = model.bic(mz_array)
+    return aic_results, bic_results
 
 
 class PeakModel(MSIData):
     def __init__(self, path):
         super().__init__(path)
-        ...
 
     def find_minimum_variance_correlation(self, verbose = True):
         
@@ -241,11 +262,11 @@ class PeakModel(MSIData):
         plt.show()
                 
     def prepare_gaussian_mixture(self, n_component_max = 30, n_repeat_experiment = 10, max_iter = 100, n_init = 10, covariance_type = 'diag', plot = True, vertical_line = 10, suptitle = False):
-        n_component_max = guassian_input_check(n_component_max, self.chunk_count)
-        n_repeat_experiment = guassian_input_check(n_repeat_experiment, self.chunk_count)
-        max_iter = guassian_input_check(max_iter, self.chunk_count)
-        n_init = guassian_input_check(n_init, self.chunk_count)
-        vertical_line = guassian_input_check(vertical_line, self.chunk_count)
+        n_component_max = gaussian_input_check(n_component_max, self.chunk_count)
+        n_repeat_experiment = gaussian_input_check(n_repeat_experiment, self.chunk_count)
+        max_iter = gaussian_input_check(max_iter, self.chunk_count)
+        n_init = gaussian_input_check(n_init, self.chunk_count)
+        vertical_line = gaussian_input_check(vertical_line, self.chunk_count)
         
         aic_result_list = []
         bic_result_list = []
@@ -382,3 +403,26 @@ class PeakModel(MSIData):
         all_peaks_gmm = np.vstack((self.filter_models[0][0].means_, self.filter_models[1][0].means_, self.filter_models[2][0].means_))
         self.all_candidate_peaks = all_peaks_gmm
         
+
+
+def return_candidate_peaks(obj, plot=False):
+    random = np.sort(np.vstack((obj.gmm_chunks[0].means_,
+                                obj.gmm_chunks[1].means_,
+                                obj.gmm_chunks[2].means_)).reshape(-1)).reshape(-1, 1)
+    known = obj.all_candidate_peaks.reshape(-1, 1)
+    if plot:
+        xlim = [[2800, 4500], [5600, 6100], [11000, 12000]]
+        fig, axs = plt.subplots(3, 1, figsize=(10, 8))
+        for i in range(3):
+            ax = axs[i]
+            ax.plot(random, np.ones(random.shape), 'o', label='Random Peaks', ms=3)
+            ax.plot(known, np.ones(known.shape) - 0.15, 'o', label='Known Peaks', ms=3)
+            ax.set_xlabel('$m/z$')
+            ax.set_xlim(xlim[i])
+            ax.set_ylim(0.7, 1.1)
+            ax.set_yticks([0.85, 1])
+            ax.set_yticklabels(['Means\nRandom Peaks', 'Means\nKnown Peaks'])
+            ax.set_title(f'Detected Peaks - Cluster {i+1}')
+        plt.tight_layout()
+        plt.show()
+    return random, known

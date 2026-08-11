@@ -1,10 +1,11 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 from .helpers import make_image, find_nearest_idx
 from .io import load_data
 
-class MSIData(self):
+class MSIData:
     def __init__(self, path):
         '''
         obj.correlated_insulin has 4 columns: m/z value, correlation, correlated with which insulin (0 both, 1 insulin1, 2 insulin2) and expressed in nonislets (boolean)
@@ -13,11 +14,17 @@ class MSIData(self):
         self.data_all, self.residual, self.mz_vector, self.row2grid = load_data(path, dataset = dataset)
         self.data_all[self.data_all < 0] = 0
         
-        path_index = path + '/cluster_indexes.npy'
-
-        with open(path_index, 'rb') as f:
-            self.cluster_labels = np.load(f)
-        self.cluster_labels_map = make_image(self.row2grid, self.cluster_labels)
+        # cluster_indexes.npy is produced by the mapping step (IsletMap). Load it if
+        # it already exists so PeakModel/validation can use the labels. IsletMap is
+        # what *generates* the labels, so it must be able to construct without it.
+        path_index = os.path.join(path, 'cluster_indexes.npy')
+        if os.path.exists(path_index):
+            with open(path_index, 'rb') as f:
+                self.cluster_labels = np.load(f)
+            self.cluster_labels_map = make_image(self.row2grid, self.cluster_labels)
+        else:
+            self.cluster_labels = None
+            self.cluster_labels_map = None
 
         self.data = np.empty((self.data_all.shape[1], 228, 165))
         for mz_index in range(self.data_all.shape[1]):
